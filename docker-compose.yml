@@ -1,0 +1,50 @@
+version: '3.3'
+
+services:
+  rabbitmq: 
+    image: rabbitmq:management
+    hostname: "rabbitmq"
+    ports:
+      - 5673:5672
+      - 15672:15672
+    logging:
+      driver: none
+    # environment:
+    #   RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+    #   RABBITMQ_DEFAULT_VHOST: "/"
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:15672"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+  model-preprocess:
+    build: model-preprocess/.
+    restart: on-failure
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_CONNECTION: 'rabbitmq'
+      PYTHONUNBUFFERED: 1
+    # command: ["./wait-for-it.sh", "rabbitmq:5672", "--", "python", "main.py"]
+  model-create:
+    build: ./model-create
+    restart: on-failure
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_CONNECTION: 'rabbitmq'
+      PYTHONUNBUFFERED: 1
+  model-deploy:
+    build: ./model-deploy
+    restart: on-failure
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_CONNECTION: 'rabbitmq'
+      PYTHONUNBUFFERED: 1
