@@ -6,17 +6,9 @@ services:
     hostname: "rabbitmq"
     ports:
       - 5673:5672
-      - 15672:15672
+      - 15673:15672
     logging:
       driver: none
-    # environment:
-    #   RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
-    #   RABBITMQ_DEFAULT_VHOST: "/"
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:15672"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 5
   model-preprocess:
     build: model-preprocess/.
     restart: on-failure
@@ -41,6 +33,8 @@ services:
   model-deploy:
     build: ./model-deploy
     restart: on-failure
+    volumes:
+     - ./model-deploy:/app
     links:
       - rabbitmq
     depends_on:
@@ -48,3 +42,14 @@ services:
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
+  minio:
+    image: minio/minio
+    hostname: "minio"
+    volumes:
+      - ./minio-data:/data
+    ports:
+      - "9001:9000"
+    environment:
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+    command: server /data
