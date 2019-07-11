@@ -41,7 +41,11 @@ services:
       - rabbitmq
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
+      MINIO_CONNECTION: "play.min.io:9000"
+      MONGO_CONNECTION: "mongodb://mongo:27017/"
       PYTHONUNBUFFERED: 1
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
   minio:
     image: minio/minio
     hostname: "minio"
@@ -53,3 +57,8 @@ services:
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
     command: server /data
+  mongo:
+    image: mongo:4.0.4
+    hostname: "mongo"
+    ports:
+    - 27017:27017
