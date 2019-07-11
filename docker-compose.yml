@@ -4,14 +4,27 @@ services:
   rabbitmq: 
     image: rabbitmq:management
     hostname: "rabbitmq"
+    restart: always
     ports:
-      - 5673:5672
-      - 15673:15672
+      - 5672:5672
+      - 15672:15672
     logging:
       driver: none
+  minio:
+    image: minio/minio
+    hostname: "minio"
+    volumes:
+      - ./minio-data:/data
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+    command: server /data
   model-preprocess:
-    build: model-preprocess/.
-    restart: on-failure
+    build: ./model-preprocess
+    volumes:
+      - ./model-preprocess:/app
     links:
       - rabbitmq
     depends_on:
@@ -19,10 +32,10 @@ services:
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
-    # command: ["./wait-for-it.sh", "rabbitmq:5672", "--", "python", "main.py"]
   model-create:
     build: ./model-create
-    restart: on-failure
+    volumes:
+      - ./model-create:/app
     links:
       - rabbitmq
     depends_on:
@@ -32,13 +45,14 @@ services:
       PYTHONUNBUFFERED: 1
   model-deploy:
     build: ./model-deploy
-    restart: on-failure
     volumes:
      - ./model-deploy:/app
     links:
       - rabbitmq
+      - minio
     depends_on:
       - rabbitmq
+      - minio
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       MINIO_CONNECTION: "play.min.io:9000"
@@ -46,19 +60,34 @@ services:
       PYTHONUNBUFFERED: 1
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-  minio:
-    image: minio/minio
-    hostname: "minio"
-    volumes:
-      - ./minio-data:/data
-    ports:
-      - "9001:9000"
-    environment:
-      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
-      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-    command: server /data
   mongo:
     image: mongo:4.0.4
     hostname: "mongo"
     ports:
     - 27017:27017
+  server-api:
+    build: ./server-api
+    volumes:
+      - ./server-api:/app
+    ports:
+      - "8000:8000"
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_CONNECTION: 'rabbitmq'
+      PYTHONUNBUFFERED: 1
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - HOST=0.0.0.0
+    ports:
+      - "3000:3000"
+    links:
+      - server-api
+    depends_on:
+      - server-api
