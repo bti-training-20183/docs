@@ -10,6 +10,14 @@ services:
       - 15672:15672
     logging:
       driver: none
+  mongo:
+    image: mongo:latest
+    hostname: "mongo"
+    restart: always
+    logging:
+      driver: none
+    ports:
+      - '27017:27017'
   minio:
     image: minio/minio
     hostname: "minio"
@@ -23,19 +31,30 @@ services:
     command: server /data
   model-preprocess:
     build: ./model-preprocess
+    restart: always
     volumes:
       - ./model-preprocess:/app
     links:
       - rabbitmq
+      - minio
     depends_on:
       - rabbitmq
+      - minio
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+      MINIO_URL: "minio:9000"
+      MINIO_BUCKET: "brains"
+      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_DB: "logsDB"
+      MONGO_COLLECTION: "preprocessor"
   model-create:
     build: ./model-create
     volumes:
       - ./model-create:/app
+      - tmp:/app/tmp
     links:
       - rabbitmq
     depends_on:
@@ -46,7 +65,8 @@ services:
   model-deploy:
     build: ./model-deploy
     volumes:
-     - ./model-deploy:/app
+      - ./model-deploy:/app
+      - tmp:/app/tmp
     links:
       - rabbitmq
       - minio
@@ -58,17 +78,27 @@ services:
       PYTHONUNBUFFERED: 1
   server-api:
     build: ./server-api
+    restart: always
     volumes:
       - ./server-api:/app
     ports:
       - "8000:8000"
     links:
       - rabbitmq
+      - minio
     depends_on:
       - rabbitmq
+      - minio
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+      MINIO_URL: "minio:9000"
+      MINIO_BUCKET: "brains"
+      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_DB: "logsDB"
+      MONGO_COLLECTION: "client"
   frontend:
     build: ./frontend
     volumes:
@@ -82,4 +112,3 @@ services:
       - server-api
     depends_on:
       - server-api
-      
