@@ -54,7 +54,6 @@ services:
     build: ./model-create
     volumes:
       - ./model-create:/app
-      - tmp:/app/tmp
     links:
       - rabbitmq
     depends_on:
@@ -66,7 +65,6 @@ services:
     build: ./model-deploy
     volumes:
       - ./model-deploy:/app
-      - tmp:/app/tmp
     links:
       - rabbitmq
       - minio
