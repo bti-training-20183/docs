@@ -61,6 +61,13 @@ services:
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+      MINIO_URL: "minio:9000"
+      MINIO_BUCKET: "brains"
+      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_DB: "logsDB"
+      MONGO_COLLECTION: "creator"
   model-deploy:
     build: ./model-deploy
     volumes:
@@ -74,6 +81,13 @@ services:
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+      MINIO_URL: "minio:9000"
+      MINIO_BUCKET: "brains"
+      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_DB: "logsDB"
+      MONGO_COLLECTION: "deployer"
   server-api:
     build: ./server-api
     restart: always
