@@ -1,0 +1,39 @@
+title Model Create
+participant Client/Frontend (Nuxt JS)
+participant RabbitMQ
+participantgroup #lightblue Server Model
+participant Model API (Flask)
+participant Data Preprocess
+participant Model Create
+participant Model Deploy
+end
+participantgroup #lightgreen Database
+participant Mongo
+end
+participantgroup #yellow Datastore
+participant Minio
+participant Amazon S3
+end
+Client/Frontend (Nuxt JS)->Model API (Flask): Upload Data (txt/csv,..)
+Model API (Flask)->Minio: Save Raw Data
+Model API (Flask)->Mongo: Save Logs
+Model API (Flask)->RabbitMQ: Send Message: Data Received
+RabbitMQ ->Data Preprocess: On Message: Data Received
+Data Preprocess->Minio: Download Raw Data
+Minio-->Data Preprocess: Raw Data
+Data Preprocess->(2)Data Preprocess: Data Processing
+Data Preprocess -> Minio: Save Preprocessed Data
+Data Preprocess ->Mongo: Save Logs
+Data Preprocess ->RabbitMQ: Send Message: Data Preprocessing Finished
+RabbitMQ->Model Create: On Message: Data Preprocessing Finished. Create Model
+Model Create->Minio: Save Model
+Model Create->Mongo: Save Logs
+Model Create ->RabbitMQ: Send Message: Model Created
+RabbitMQ->Model Deploy: On Message: Model Created. Update Model
+Model Deploy->Minio: Get Model
+Minio -->Model Deploy: Model
+Model Deploy->Amazon S3: Upload Model
+Model Deploy->Mongo: Save Logs
+Model Deploy->RabbitMQ: Send Message: Model Updated
+RabbitMQ->Model API (Flask): On Message: Model Updated. Call hook
+Model API (Flask)->Client/Frontend (Nuxt JS): Return Model to View
