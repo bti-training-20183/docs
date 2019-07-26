@@ -1,0 +1,38 @@
+title Model Create & Deploy
+participant Client
+participant RabbitMQ
+participantgroup #lightblue Cloud Server
+participant API (Flask)
+participant Data Preprocess
+participant Model Create
+participant Model Deploy
+end
+participantgroup #lightgreen Database
+participant Mongo
+end
+participantgroup #yellow Datastore
+participant Minio/S3
+end
+participant Edge Server
+Client->API (Flask): Upload Data (txt/csv/...)
+API (Flask)->Minio/S3: Save Raw Data
+API (Flask)->Mongo: Save Logs
+API (Flask)->RabbitMQ: Send Message: Data Received
+RabbitMQ ->Data Preprocess: On Message: Data Received
+Data Preprocess->Minio/S3: Download Raw Data
+Minio/S3-->Data Preprocess: Raw Data
+Data Preprocess->(2)Data Preprocess: Data Processing
+Data Preprocess -> Minio/S3: Save Preprocessed Data
+Data Preprocess ->Mongo: Save Logs
+Data Preprocess ->RabbitMQ: Send Message: Data Preprocessing Finished
+RabbitMQ->Model Create: On Message: Data Preprocessing Finished. Create Model
+Model Create->(2)Model Create: Train Model
+Model Create->Minio/S3: Save Model
+Model Create->Mongo: Save Logs
+Model Create ->RabbitMQ: Send Message: Model Created
+RabbitMQ->Model Deploy: On Message: Model Created. Update Model
+Model Deploy->Minio/S3: Get Model
+Minio/S3 -->Model Deploy: Model
+Model Deploy->Edge Server: Update Model
+
+
