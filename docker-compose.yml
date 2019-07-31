@@ -18,16 +18,27 @@ services:
       driver: none
     ports:
       - '27017:27017'
-  minio:
+  cloud-minio:
     image: minio/minio
-    hostname: "minio"
+    hostname: "cloud-minio"
     volumes:
-      - ./minio-data:/data
+      - ./cloud-minio-data:/data
     ports:
       - "9000:9000"
     environment:
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+    command: server /data
+  edge-minio:
+    image: minio/minio
+    hostname: "edge-minio"
+    volumes:
+      - ./edge-minio-data:/data
+    ports:
+      - "9001:9000"
+    environment:
+      MINIO_ACCESS_KEY: "6D8D341ABA51C6ED"
+      MINIO_SECRET_KEY: "HYOjcwvYuPhS6qbXS42YNkKWKfcDnV9E"
     command: server /data
   model-preprocess:
     build: ./model-preprocess
@@ -36,16 +47,16 @@ services:
       - ./model-preprocess:/app
     links:
       - rabbitmq
-      - minio
+      - cloud-minio
     depends_on:
       - rabbitmq
-      - minio
+      - cloud-minio
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-      MINIO_URL: "minio:9000"
+      MINIO_URL: "cloud-minio:9000"
       MINIO_BUCKET: "brains"
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
@@ -56,14 +67,18 @@ services:
       - ./model-create:/app
     links:
       - rabbitmq
+      - cloud-minio
+      - mongo
     depends_on:
       - rabbitmq
+      - cloud-minio
+      - mongo
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-      MINIO_URL: "minio:9000"
+      MINIO_URL: "cloud-minio:9000"
       MINIO_BUCKET: "brains"
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
@@ -74,56 +89,88 @@ services:
       - ./model-deploy:/app
     links:
       - rabbitmq
-      - minio
+      - cloud-minio
+      - mongo
     depends_on:
       - rabbitmq
-      - minio
+      - cloud-minio
+      - mongo
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-      MINIO_URL: "minio:9000"
+      MINIO_URL: "cloud-minio:9000"
       MINIO_BUCKET: "brains"
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "deployer"
-      S3_ACCESS_KEY: "AKIAJ5OOWBJYGXYLIGFQ"
-      S3_SECRET_KEY: "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"
+      S3_ACCESS_KEY: "AKIA4ZCV3PF73BXK2LMH"
+      S3_SECRET_KEY: "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"
       S3_BUCKET: "bti-20183"
-  server-api:
-    build: ./server-api
-    restart: always
+      EDGE_ENDPOINT: "http://edge-server:8000/update"
+  cloud-server:
+    build: ./cloud-server
+    # restart: always
+    hostname: "cloud-server"
     volumes:
-      - ./server-api:/app
+      - ./cloud-server:/app
     ports:
       - "8000:8000"
     links:
       - rabbitmq
-      - minio
+      - cloud-minio
+      - mongo
     depends_on:
       - rabbitmq
-      - minio
+      - cloud-minio
+      - mongo
     environment:
       RABBITMQ_CONNECTION: 'rabbitmq'
       PYTHONUNBUFFERED: 1
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-      MINIO_URL: "minio:9000"
+      MINIO_URL: "cloud-minio:9000"
       MINIO_BUCKET: "brains"
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "client"
-  frontend:
-    build: ./frontend
+      S3_ACCESS_KEY: "AKIA4ZCV3PF73BXK2LMH"
+      S3_SECRET_KEY: "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"
+      S3_BUCKET: "bti-20183"
+  cloud-frontend:
+    build: ./cloud-frontend
     volumes:
-      - ./frontend:/app
+      - ./cloud-frontend:/app
       - /app/node_modules
     environment:
       - HOST=0.0.0.0
     ports:
       - "3000:3000"
     links:
-      - server-api
+      - cloud-server
     depends_on:
-      - server-api
+      - cloud-server
+  edge-server:
+    build: ./edge-server
+    hostname: "edge-server"
+    # restart: always
+    volumes:
+      - ./edge-server:/app
+    ports:
+      - "8001:8000"
+    links:
+      - edge-minio
+      - mongo
+    depends_on:
+      - edge-minio
+      - mongo
+    environment:
+      PYTHONUNBUFFERED: 1
+      MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
+      MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+      MINIO_URL: "cloud-minio:9000"
+      MINIO_BUCKET: "brains"
+      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_DB: "logsDB"
+      MONGO_COLLECTION: "edge"
