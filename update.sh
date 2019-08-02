@@ -33,7 +33,7 @@ echo
 echo
 echo ---------------UPDATE FRONTEND----------------
 cd ..;
-cd ./frontend && git pull origin master;
+cd ./cloud-frontend && git pull origin master;
 cd ..;
 echo
 read -p "Copy docs/docker-compose.yml to ./docker-compose.yml? (y/n)" -n 1 -r
