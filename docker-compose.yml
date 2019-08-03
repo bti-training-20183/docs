@@ -105,8 +105,8 @@ services:
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "deployer"
-      S3_ACCESS_KEY: ""
-      S3_SECRET_KEY: ""
+      S3_ACCESS_KEY: "${S3_ACCESS_KEY}"
+      S3_SECRET_KEY: "${S3_SECRET_KEY}"
       S3_BUCKET: "bti-20183"
       EDGE_ENDPOINT: "http://edge-server:8000/update"
   cloud-server:
@@ -135,8 +135,8 @@ services:
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "client"
-      S3_ACCESS_KEY: ""
-      S3_SECRET_KEY: ""
+      S3_ACCESS_KEY: "${S3_ACCESS_KEY}"
+      S3_SECRET_KEY: "${S3_SECRET_KEY}"
       S3_BUCKET: "bti-20183"
   cloud-frontend:
     build: ./cloud-frontend
