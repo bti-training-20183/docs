@@ -1,5 +1,12 @@
 #!/bin/bash
 
+cmd=$(pwd | grep "docs")
+if [ -n "${cmd}" ]
+then 
+	echo "Current folder is docs"
+	echo "Change folder to parent folder"
+	cd ..
+fi
 echo
 echo
 echo ---------------UPDATE DOCS----------------
