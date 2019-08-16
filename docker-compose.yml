@@ -63,6 +63,7 @@ services:
       MONGO_COLLECTION: "preprocessor"
   model-create:
     build: ./model-create
+    restart: always
     volumes:
       - ./model-create:/app
     links:
@@ -134,7 +135,10 @@ services:
       MINIO_BUCKET: "brains"
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB: "logsDB"
-      MONGO_COLLECTION: "client"
+      MONGO_COLLECTION: "cloud_server"
+      PREPROCESSOR_MONGO_COLLECTION: "preprocessor"
+      CREATOR_MONGO_COLLECTION: "creator"
+      DEPLOYER_MONGO_COLLECTION: "deployer"
       S3_ACCESS_KEY: "${S3_ACCESS_KEY}"
       S3_SECRET_KEY: "${S3_SECRET_KEY}"
       S3_BUCKET: "bti-20183"
