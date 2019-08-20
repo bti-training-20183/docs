@@ -41,7 +41,8 @@ echo
 echo ---------------UPDATE FRONTEND----------------
 cd ..;
 cd ./cloud-frontend && git checkout master && git pull origin master;
-cd ..;
+echo
+echo
 echo ---------------UPDATE EDGE-PUT-DATA----------------
 cd ..;
 cd ./edge-put-data && git checkout master && git pull origin master;
@@ -51,6 +52,6 @@ read -p "Copy docs/docker-compose.yml to ./docker-compose.yml? (y/n)" -n 1 -r
 echo 
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    cp ./docs/docker-compose.yml .
+    cp docs/docker-compose.yml .
     echo "Copied docs/docker-compose.yml to ./docker-compose.yml"
 fi
