@@ -42,6 +42,10 @@ echo ---------------UPDATE FRONTEND----------------
 cd ..;
 cd ./cloud-frontend && git checkout master && git pull origin master;
 cd ..;
+echo ---------------UPDATE EDGE-PUT-DATA----------------
+cd ..;
+cd ./edge-put-data && git checkout master && git pull origin master;
+cd ..;
 echo
 read -p "Copy docs/docker-compose.yml to ./docker-compose.yml? (y/n)" -n 1 -r
 echo 

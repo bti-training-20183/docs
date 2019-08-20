@@ -29,6 +29,9 @@ echo
 echo ---------------Clone FRONTEND----------------
 git clone https://github.com/bti-training-20183/cloud-frontend
 echo
+echo ---------------Clone EDGE-PUT-DATA----------------
+git clone https://github.com/bti-training-20183/edge-put-data
+echo
 read -p "Copy docs/docker-compose.yml to ./docker-compose.yml? (y/n)" -n 1 -r
 echo 
 if [[ $REPLY =~ ^[Yy]$ ]]
