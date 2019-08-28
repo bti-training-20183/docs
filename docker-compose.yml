@@ -18,17 +18,11 @@ services:
       driver: none
     ports:
       - '27017:27017'
-  edge-mongo:
-    image: mongo:latest
-    hostname: "edge-mongo"
-    restart: always
-    logging:
-      driver: none
-    ports:
-      - '27018:27017'
   cloud-minio:
     image: minio/minio
     hostname: "cloud-minio"
+    logging:
+      driver: none
     volumes:
       - ./cloud-minio-data:/data
     ports:
@@ -36,28 +30,6 @@ services:
     environment:
       MINIO_ACCESS_KEY: "Q3AM3UQ867SPQQA43P2F"
       MINIO_SECRET_KEY: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-    command: server /data
-  edge-minio:
-    image: minio/minio
-    hostname: "edge-minio"
-    volumes:
-      - ./edge-minio-data:/data
-    ports:
-      - "9001:9000"
-    environment:
-      MINIO_ACCESS_KEY: "6D8D341ABA51C6ED"
-      MINIO_SECRET_KEY: "HYOjcwvYuPhS6qbXS42YNkKWKfcDnV9E"
-    command: server /data
-  s3-minio:
-    image: minio/minio
-    hostname: "s3-minio"
-    volumes:
-      - ./s3-minio-data:/data
-    ports:
-      - "9002:9000"
-    environment:
-      MINIO_ACCESS_KEY: "6D8D341ABA51C6ED"
-      MINIO_SECRET_KEY: "HYOjcwvYuPhS6qbXS42YNkKWKfcDnV9E"
     command: server /data
   model-preprocess:
     build: ./model-preprocess
@@ -176,6 +148,40 @@ services:
       - cloud-server
     depends_on:
       - cloud-server
+  edge-minio:
+    image: minio/minio
+    hostname: "edge-minio"
+    logging:
+      driver: none
+    volumes:
+      - ./edge-minio-data:/data
+    ports:
+      - "9001:9000"
+    environment:
+      MINIO_ACCESS_KEY: "6D8D341ABA51C6ED"
+      MINIO_SECRET_KEY: "HYOjcwvYuPhS6qbXS42YNkKWKfcDnV9E"
+    command: server /data
+  s3-minio:
+    image: minio/minio
+    hostname: "s3-minio"
+    logging:
+      driver: none
+    volumes:
+      - ./s3-minio-data:/data
+    ports:
+      - "9002:9000"
+    environment:
+      MINIO_ACCESS_KEY: "6D8D341ABA51C6ED"
+      MINIO_SECRET_KEY: "HYOjcwvYuPhS6qbXS42YNkKWKfcDnV9E"
+    command: server /data
+  edge-mongo:
+    image: mongo:latest
+    hostname: "edge-mongo"
+    restart: always
+    logging:
+      driver: none
+    ports:
+      - '27018:27017'
   edge-server:
     build: ./edge-server
     hostname: "edge-server"
@@ -186,7 +192,7 @@ services:
       - "8001:8000"
     links:
       - edge-minio
-      - cloud-mongo
+      - edge-mongo
     depends_on:
       - edge-minio
       - edge-mongo
@@ -200,6 +206,7 @@ services:
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "edge_server"
       S3_ENDPOINT: "${S3_ENDPOINT}"
+      API_KEY: "KFPBCODIA6K92KZF"
   edge-put-data:
     build: ./edge-put-data
     volumes:
