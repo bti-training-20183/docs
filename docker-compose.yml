@@ -206,7 +206,7 @@ services:
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "edge_server"
       S3_ENDPOINT: "${S3_ENDPOINT}"
-      API_KEY: "KFPBCODIA6K92KZF"
+      # API_KEY: "KFPBCODIA6K92KZF"
   edge-put-data:
     build: ./edge-put-data
     volumes:
