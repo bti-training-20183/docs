@@ -206,21 +206,4 @@ services:
       MONGO_DB: "logsDB"
       MONGO_COLLECTION: "edge_server"
       S3_ENDPOINT: "${S3_ENDPOINT}"
-      # API_KEY: "KFPBCODIA6K92KZF"
-  edge-put-data:
-    build: ./edge-put-data
-    volumes:
-      - ./edge-put-data:/app
-    links:
-      - edge-minio
-      - edge-mongo
-    environment:
-      PYTHONUNBUFFERED: 1
-      MINIO_ACCESS_KEY: "6D8D341ABA51C6ED"
-      MINIO_SECRET_KEY: "HYOjcwvYuPhS6qbXS42YNkKWKfcDnV9E"
-      MINIO_URL: "edge-minio:9000"
-      MINIO_BUCKET: "brains"
-      MONGO_URL: "mongodb://edge-mongo:27017"
-      MONGO_DB: "logsDB"
-      MONGO_COLLECTION: "edge-data"
       API_KEY: "KFPBCODIA6K92KZF"
