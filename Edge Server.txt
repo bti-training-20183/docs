@@ -1,0 +1,22 @@
+title Edge Server/Predict
+
+participant Client
+participantgroup #lightblue Cloud Server
+participant Server (Flask)
+end
+participantgroup #yellow Datastore
+participant Minio/S3
+end
+fontawesome f0c2 API #1da1f2
+
+Client->Server (Flask): Select stock & Prediction period
+Server (Flask)->(2)Server (Flask): Check if model is preloaded
+rbox right of Server (Flask):If Model is not preloaded
+Server (Flask)->Minio/S3:Fetch model from Storage
+Minio/S3-->Server (Flask):Model. Save to memory
+Server (Flask)->(2)Server (Flask): Check if stock data is availble
+rbox right of Server (Flask):If data is not available
+Server (Flask)->API:Fetch data from 3rd party API
+API-->Server (Flask): Data
+Server (Flask)->Minio/S3: Save data to storage
+Server (Flask)->Client:Prediction
